@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bhatti Game</title>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
+
+    .box {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    input, button {
+      width: 90%;
+      padding: 14px;
+      margin: 7px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 17px;
+      box-sizing: border-box;
+    }
+
+    input {
+      background: white;
+      color: black;
+    }
+
+    button {
+      background: #2196f3;
+      color: white;
+      font-weight: bold;
+    }
+
+    .coins {
+      font-size: 22px;
+      margin: 15px;
+    }
+
+    .players {
+      background: #222;
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .player {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      background: #333;
+    }
+
+    #dice {
+      font-size: 60px;
+      margin: 20px;
+    }
+
+    #message {
+      min-height: 30px;
+      margin: 15px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>🎲 Bhatti Game</h1>
+
+  <div id="login">
+
+    <input id="userId" placeholder="User ID">
+
+    <input id="userName" placeholder="Your Name">
+
+    <button onclick="startGame()">
+      Start Game
+    </button>
+
+  </div>
+
+  <div id="game" style="display:none;">
+
+    <div class="coins">
+      🪙 Coins:
+      <span id="coins">0</span>
+    </div>
+
+    <button onclick="joinRoom()">
+      🎮 Join Game — 100 Coins
+    </button>
+
+    <div id="message"></div>
+
+    <div class="players">
+      <h2>Players</h2>
+      <div id="players"></div>
+    </div>
+
+    <div id="dice">🎲</div>
+
+    <button onclick="rollDice()">
+      🎲 Roll Dice
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+const socket = io();
+
+let userId = "";
+let userName = "";
+let roomId = "";
+
+function startGame() {
+
+  userId =
+    document.getElementById("userId").value.trim();
+
+  userName =
+    document.getElementById("userName").value.trim();
+
+  if (!userId || !userName) {
+    alert("User ID اور Name لکھیں");
+    return;
+  }
+
+  fetch("/api/user/init", {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      userId: userId,
+      userName: userName
+    })
+
+  })
+
+  .then(res => res.json())
+
+  .then(data => {
+
+    if (data.success) {
+
+      document.getElementById("login").style.display =
+        "none";
+
+      document.getElementById("game").style.display =
+        "block";
+
+      document.getElementById("coins").innerText =
+        data.user.coins;
+
+      showMessage(
+        "Welcome " + userName + " 🎉"
+      );
+
+    }
+
+  });
+
+}
+
+function joinRoom() {
+
+  socket.emit("join_room", {
+
+    userId: userId,
+
+    userName: userName
+
+  });
+
+}
+
+function rollDice() {
+
+  if (!roomId) {
+
+    showMessage(
+      "پہلے game join کریں"
+    );
+
+    return;
+  }
+
+  socket.emit("roll_dice", {
+
+    roomId: roomId
+
+  });
+
+}
+
+socket.on("room_update", data => {
+
+  roomId = data.roomId;
+
+  showMessage(data.message);
+
+  let html = "";
+
+  data.players.forEach(player => {
+
+    html += `
+      <div class="player">
+        👤 ${player.userName}
+        <br>
+        🎨 ${player.color}
+      </div>
+    `;
+
+  });
+
+  document.getElementById("players").innerHTML =
+    html;
+
+});
+
+socket.on("game_started", data => {
+
+  roomId = data.roomId;
+
+  showMessage(
+    "🎉 Game Started!"
+  );
+
+});
+
+socket.on("dice_rolled", data => {
+
+  document.getElementById("dice").innerText =
+    "🎲 " + data.diceValue;
+
+  showMessage(
+    data.player.userName +
+    " نے " +
+    data.diceValue +
+    " نکالا"
+  );
+
+});
+
+socket.on("turn_changed", data => {
+
+  showMessage(
+    "اب " +
+    data.nextTurn.userName +
+    " کی باری ہے"
+  );
+
+});
+
+socket.on("error_msg", message => {
+
+  showMessage(
+    "❌ " + message
+  );
+
+});
+
+function showMessage(message) {
+
+  document.getElementById("message").innerText =
+    message;
+
+}
+
+</script>
+
+</body>
+</html>
