@@ -1,3 +1,319 @@
-cd ~/bhatti-game
-cat > index.html
-node server.js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhatti Game</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#101828,#172554);
+  color:white;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:430px;
+}
+
+.card{
+  background:#1e293b;
+  border-radius:22px;
+  padding:25px;
+  box-shadow:0 10px 35px rgba(0,0,0,.45);
+  text-align:center;
+}
+
+h1{
+  font-size:34px;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  color:#94a3b8;
+  margin-bottom:22px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin-bottom:12px;
+  border:0;
+  border-radius:12px;
+  background:#334155;
+  color:white;
+  font-size:16px;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:0;
+  border-radius:12px;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#22c55e;
+  color:white;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+.logout{
+  background:#ef4444;
+}
+
+.hidden{
+  display:none;
+}
+
+.coins{
+  background:#0f172a;
+  padding:15px;
+  border-radius:15px;
+  margin:15px 0;
+  font-size:20px;
+}
+
+.game{
+  margin-top:20px;
+}
+
+.dice{
+  font-size:80px;
+  margin:20px 0;
+}
+
+.result{
+  font-size:22px;
+  font-weight:bold;
+  min-height:30px;
+}
+
+.players{
+  margin-top:20px;
+  padding:15px;
+  background:#0f172a;
+  border-radius:15px;
+}
+
+.small{
+  color:#94a3b8;
+  font-size:13px;
+  margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+
+  <h1>🎮 Bhatti Game</h1>
+  <div class="subtitle">Login to start playing</div>
+
+  <input
+    type="text"
+    id="name"
+    placeholder="Enter your name"
+  >
+
+  <input
+    type="text"
+    id="userId"
+    placeholder="Enter User ID"
+  >
+
+  <button onclick="login()">Login</button>
+
+  <div class="small">
+    Welcome to Bhatti Game
+  </div>
+
+</div>
+
+
+<!-- GAME -->
+<div class="card hidden" id="gameBox">
+
+  <h1>🎮 Bhatti Game</h1>
+
+  <div id="welcome"></div>
+
+  <div class="coins">
+    🪙 Coins: <span id="coins">1000</span>
+  </div>
+
+  <button onclick="joinGame()">
+    🎮 Join Game — 100 Coins
+  </button>
+
+  <div class="game">
+
+    <div class="dice" id="dice">
+      🎲
+    </div>
+
+    <div class="result" id="result">
+      Roll the dice
+    </div>
+
+    <button onclick="rollDice()">
+      🎲 Roll Dice
+    </button>
+
+  </div>
+
+  <div class="players">
+    👥 Players Online: <span id="players">1</span>
+  </div>
+
+  <button class="logout" onclick="logout()">
+    Logout
+  </button>
+
+</div>
+
+</div>
+
+
+<script>
+
+let coins = 1000;
+let joined = false;
+
+function login(){
+
+  const name = document.getElementById("name").value.trim();
+  const userId = document.getElementById("userId").value.trim();
+
+  if(!name || !userId){
+
+    alert("Please enter Name and User ID");
+
+    return;
+  }
+
+  localStorage.setItem("bhattiName",name);
+  localStorage.setItem("bhattiUserId",userId);
+
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("gameBox").classList.remove("hidden");
+
+  document.getElementById("welcome").innerHTML =
+    "Welcome, <b>" + name + "</b> 👋";
+
+  document.getElementById("coins").innerText = coins;
+}
+
+
+function joinGame(){
+
+  if(coins < 100){
+
+    alert("Not enough coins!");
+
+    return;
+  }
+
+  coins -= 100;
+  joined = true;
+
+  document.getElementById("coins").innerText = coins;
+
+  document.getElementById("result").innerText =
+    "Game joined! Roll the dice 🎲";
+}
+
+
+function rollDice(){
+
+  if(!joined){
+
+    alert("First join the game!");
+
+    return;
+  }
+
+  const number = Math.floor(Math.random()*6)+1;
+
+  const diceFaces = [
+    "⚀",
+    "⚁",
+    "⚂",
+    "⚃",
+    "⚄",
+    "⚅"
+  ];
+
+  document.getElementById("dice").innerText =
+    diceFaces[number-1];
+
+  document.getElementById("result").innerText =
+    "You rolled: " + number;
+
+  if(number >= 4){
+
+    coins += 200;
+
+    document.getElementById("result").innerText =
+      "🎉 You won 200 coins!";
+
+  }
+
+  document.getElementById("coins").innerText = coins;
+
+  joined = false;
+}
+
+
+function logout(){
+
+  localStorage.removeItem("bhattiName");
+  localStorage.removeItem("bhattiUserId");
+
+  location.reload();
+}
+
+
+window.onload = function(){
+
+  const name = localStorage.getItem("bhattiName");
+  const userId = localStorage.getItem("bhattiUserId");
+
+  if(name && userId){
+
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("gameBox").classList.remove("hidden");
+
+    document.getElementById("welcome").innerHTML =
+      "Welcome, <b>" + name + "</b> 👋";
+
+    document.getElementById("coins").innerText = coins;
+  }
+
+};
+
+</script>
+
+</body>
+</html>
