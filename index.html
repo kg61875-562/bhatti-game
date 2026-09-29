@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bhatti Game</title>
+<title>Bhatti Ludo</title>
 
 <style>
 *{
@@ -14,110 +14,174 @@
 
 body{
   font-family:Arial,sans-serif;
-  background:linear-gradient(135deg,#101828,#172554);
+  background:linear-gradient(135deg,#101828,#182848);
   color:white;
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:20px;
 }
 
 .container{
   width:100%;
-  max-width:430px;
+  max-width:500px;
+  padding:15px;
 }
 
-.card{
-  background:#1e293b;
-  border-radius:22px;
-  padding:25px;
-  box-shadow:0 10px 35px rgba(0,0,0,.45);
+.login{
+  background:#fff;
+  color:#111;
+  padding:30px 20px;
+  border-radius:20px;
   text-align:center;
+  box-shadow:0 10px 30px #0008;
 }
 
-h1{
-  font-size:34px;
-  margin-bottom:8px;
+.login h1{
+  color:#e63946;
+  margin-bottom:10px;
 }
 
-.subtitle{
-  color:#94a3b8;
-  margin-bottom:22px;
+.login p{
+  color:#666;
+  margin-bottom:20px;
 }
 
 input{
   width:100%;
   padding:14px;
-  margin-bottom:12px;
-  border:0;
-  border-radius:12px;
-  background:#334155;
-  color:white;
+  margin:8px 0;
+  border:1px solid #ddd;
+  border-radius:10px;
   font-size:16px;
-  outline:none;
 }
 
 button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
   border:0;
   border-radius:12px;
-  font-size:17px;
+  padding:13px 20px;
+  font-size:16px;
   font-weight:bold;
   cursor:pointer;
-  background:#22c55e;
+}
+
+.login button{
+  width:100%;
+  background:#e63946;
   color:white;
-}
-
-button:hover{
-  opacity:.9;
-}
-
-.logout{
-  background:#ef4444;
-}
-
-.hidden{
-  display:none;
-}
-
-.coins{
-  background:#0f172a;
-  padding:15px;
-  border-radius:15px;
-  margin:15px 0;
-  font-size:20px;
+  margin-top:10px;
 }
 
 .game{
-  margin-top:20px;
+  display:none;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.header h1{
+  font-size:26px;
+}
+
+.coins{
+  background:#f5c542;
+  color:#111;
+  padding:8px 12px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+.board{
+  width:100%;
+  aspect-ratio:1;
+  background:white;
+  padding:5px;
+  display:grid;
+  grid-template-columns:repeat(15,1fr);
+  grid-template-rows:repeat(15,1fr);
+  border:5px solid #111;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.cell{
+  border:1px solid #bbb;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:10px;
+}
+
+.red{background:#e63946;}
+.green{background:#2a9d5b;}
+.yellow{background:#f4c430;}
+.blue{background:#2878d4;}
+
+.home-red{background:#ff7777;}
+.home-green{background:#72d69b;}
+.home-yellow{background:#ffe477;}
+.home-blue{background:#72aaf0;}
+
+.center{
+  background:linear-gradient(45deg,#e63946 25%,#f4c430 25%,#f4c430 50%,#2a9d5b 50%,#2a9d5b 75%,#2878d4 75%);
+}
+
+.controls{
+  margin-top:15px;
+  background:#ffffff15;
+  padding:15px;
+  border-radius:15px;
+  text-align:center;
 }
 
 .dice{
-  font-size:80px;
-  margin:20px 0;
+  width:75px;
+  height:75px;
+  background:white;
+  color:#111;
+  margin:10px auto;
+  border-radius:15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:40px;
+  font-weight:bold;
 }
 
-.result{
-  font-size:22px;
+.roll{
+  background:#f5c542;
+  color:#111;
+  width:150px;
+}
+
+.message{
+  margin-top:10px;
+  min-height:25px;
   font-weight:bold;
-  min-height:30px;
 }
 
 .players{
-  margin-top:20px;
-  padding:15px;
-  background:#0f172a;
-  border-radius:15px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
 }
 
-.small{
-  color:#94a3b8;
-  font-size:13px;
-  margin-top:15px;
+.player{
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  font-weight:bold;
 }
+
+.p1{background:#e63946;}
+.p2{background:#2a9d5b;}
+.p3{background:#f4c430;color:#111;}
+.p4{background:#2878d4;}
 </style>
 </head>
 
@@ -126,70 +190,47 @@ button:hover{
 <div class="container">
 
 <!-- LOGIN -->
-<div class="card" id="loginBox">
+<div class="login" id="login">
+  <h1>🎲 Bhatti Ludo</h1>
+  <p>Welcome to Bhatti Games</p>
 
-  <h1>🎮 Bhatti Game</h1>
-  <div class="subtitle">Login to start playing</div>
+  <input id="name" type="text" placeholder="Apna naam likhein">
+  <input id="email" type="email" placeholder="Email">
 
-  <input
-    type="text"
-    id="name"
-    placeholder="Enter your name"
-  >
-
-  <input
-    type="text"
-    id="userId"
-    placeholder="Enter User ID"
-  >
-
-  <button onclick="login()">Login</button>
-
-  <div class="small">
-    Welcome to Bhatti Game
-  </div>
-
+  <button onclick="startGame()">LOGIN / PLAY</button>
 </div>
 
 
 <!-- GAME -->
-<div class="card hidden" id="gameBox">
+<div class="game" id="game">
 
-  <h1>🎮 Bhatti Game</h1>
-
-  <div id="welcome"></div>
-
-  <div class="coins">
-    🪙 Coins: <span id="coins">1000</span>
+  <div class="header">
+    <h1>🎲 Bhatti Ludo</h1>
+    <div class="coins">🪙 <span id="coins">100</span></div>
   </div>
 
-  <button onclick="joinGame()">
-    🎮 Join Game — 100 Coins
-  </button>
+  <div class="board" id="board"></div>
 
-  <div class="game">
+  <div class="controls">
 
-    <div class="dice" id="dice">
-      🎲
+    <div>آپ کی باری</div>
+
+    <div class="dice" id="dice">🎲</div>
+
+    <button class="roll" onclick="rollDice()">ROLL DICE</button>
+
+    <div class="message" id="message">
+      Dice roll کریں!
     </div>
-
-    <div class="result" id="result">
-      Roll the dice
-    </div>
-
-    <button onclick="rollDice()">
-      🎲 Roll Dice
-    </button>
 
   </div>
 
   <div class="players">
-    👥 Players Online: <span id="players">1</span>
+    <div class="player p1">🔴 Player 1</div>
+    <div class="player p2">🟢 Player 2</div>
+    <div class="player p3">🟡 Player 3</div>
+    <div class="player p4">🔵 Player 4</div>
   </div>
-
-  <button class="logout" onclick="logout()">
-    Logout
-  </button>
 
 </div>
 
@@ -198,120 +239,121 @@ button:hover{
 
 <script>
 
-let coins = 1000;
-let joined = false;
+let coins = 100;
+let playerName = "";
 
-function login(){
+function startGame(){
 
-  const name = document.getElementById("name").value.trim();
-  const userId = document.getElementById("userId").value.trim();
+  playerName = document.getElementById("name").value.trim();
 
-  if(!name || !userId){
-
-    alert("Please enter Name and User ID");
-
+  if(playerName === ""){
+    alert("Apna naam likhein");
     return;
   }
 
-  localStorage.setItem("bhattiName",name);
-  localStorage.setItem("bhattiUserId",userId);
+  document.getElementById("login").style.display="none";
+  document.getElementById("game").style.display="block";
 
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("gameBox").classList.remove("hidden");
+  document.getElementById("message").innerText =
+    "Welcome " + playerName + "! Dice roll karein.";
 
-  document.getElementById("welcome").innerHTML =
-    "Welcome, <b>" + name + "</b> 👋";
-
-  document.getElementById("coins").innerText = coins;
+  createBoard();
 }
 
 
-function joinGame(){
+function createBoard(){
 
-  if(coins < 100){
+  const board = document.getElementById("board");
 
-    alert("Not enough coins!");
+  board.innerHTML="";
 
-    return;
+  for(let r=0;r<15;r++){
+
+    for(let c=0;c<15;c++){
+
+      let cell=document.createElement("div");
+
+      cell.className="cell";
+
+      /*
+       * Four home areas
+       */
+
+      if(r<6 && c<6){
+        cell.classList.add("home-red");
+      }
+
+      else if(r<6 && c>8){
+        cell.classList.add("home-green");
+      }
+
+      else if(r>8 && c<6){
+        cell.classList.add("home-yellow");
+      }
+
+      else if(r>8 && c>8){
+        cell.classList.add("home-blue");
+      }
+
+      /*
+       * Main paths
+       */
+
+      else if(r===6 || r===7 || r===8 ||
+              c===6 || c===7 || c===8){
+
+        cell.style.background="#f8f8f8";
+      }
+
+      /*
+       * Center
+       */
+
+      if(r>=6 && r<=8 && c>=6 && c<=8){
+
+        cell.classList.add("center");
+
+      }
+
+      board.appendChild(cell);
+    }
   }
-
-  coins -= 100;
-  joined = true;
-
-  document.getElementById("coins").innerText = coins;
-
-  document.getElementById("result").innerText =
-    "Game joined! Roll the dice 🎲";
 }
 
 
 function rollDice(){
 
-  if(!joined){
+  let number=Math.floor(Math.random()*6)+1;
 
-    alert("First join the game!");
+  document.getElementById("dice").innerText=number;
 
-    return;
-  }
+  document.getElementById("message").innerText=
+    "آپ نے " + number + " نکالا!";
 
-  const number = Math.floor(Math.random()*6)+1;
+  /*
+   * Small coin reward
+   */
 
-  const diceFaces = [
-    "⚀",
-    "⚁",
-    "⚂",
-    "⚃",
-    "⚄",
-    "⚅"
-  ];
+  if(number===6){
 
-  document.getElementById("dice").innerText =
-    diceFaces[number-1];
+    coins += 10;
 
-  document.getElementById("result").innerText =
-    "You rolled: " + number;
-
-  if(number >= 4){
-
-    coins += 200;
-
-    document.getElementById("result").innerText =
-      "🎉 You won 200 coins!";
+    document.getElementById("message").innerText=
+      "🎉 6 آیا! +10 coins";
 
   }
 
-  document.getElementById("coins").innerText = coins;
+  else{
 
-  joined = false;
+    coins += 1;
+
+  }
+
+  document.getElementById("coins").innerText=coins;
 }
 
 
-function logout(){
-
-  localStorage.removeItem("bhattiName");
-  localStorage.removeItem("bhattiUserId");
-
-  location.reload();
-}
-
-
-window.onload = function(){
-
-  const name = localStorage.getItem("bhattiName");
-  const userId = localStorage.getItem("bhattiUserId");
-
-  if(name && userId){
-
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("gameBox").classList.remove("hidden");
-
-    document.getElementById("welcome").innerHTML =
-      "Welcome, <b>" + name + "</b> 👋";
-
-    document.getElementById("coins").innerText = coins;
-  }
-
-};
+createBoard();
 
 </script>
 
