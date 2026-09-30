@@ -38,6 +38,7 @@ input{width:100%;padding:14px;margin:10px 0;border:1px solid #ddd;border-radius:
 .turn.r{color:#ff6b6b}.turn.g{color:#4ade80}.turn.y{color:#fde047}.turn.b{color:#60a5fa}
 .btn-roll{background:#fbbf24;color:#111;width:160px;padding:12px;border-radius:12px;border:0;font-weight:bold;font-size:17px;cursor:pointer}
 </style>
+<script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 <div class="container">
@@ -74,6 +75,275 @@ function nextTurn(){canRoll=true;current=(current+1)%4;document.getElementById('
 function updateTurn(){let p=players[current];let el=document.getElementById('turn');el.className='turn '+p;el.innerText=names[p]+' ki bari';let d=document.getElementById('dice');d.className='dice pos-'+p;d.innerText='🎲';document.getElementById('msg').innerText='Dice '+names[p]+' ke ghar me hai!';}
 </script>
 </body>
+
+<script>
+const onlineSocket = io();
+let roomCode = "";
+let myColor = "";
+
+function createOnlineRoom(){
+  const name = document.getElementById("name").value.trim() || "Player";
+
+  onlineSocket.emit("createRoom", {name:name}, function(res){
+    if(!res.ok){
+      alert(res.error || "Room create nahi hua");
+      return;
+    }
+
+    roomCode = res.code;
+    myColor = res.color;
+
+    showRoom(res.players);
+  });
+}
+
+function joinOnlineRoom(){
+  const name = document.getElementById("name").value.trim() || "Player";
+  const code = document.getElementById("roomCodeInput").value.trim().toUpperCase();
+
+  if(!code){
+    alert("Room Code likho");
+    return;
+  }
+
+  onlineSocket.emit("joinRoom", {
+    code:code,
+    name:name
+  }, function(res){
+
+    if(!res.ok){
+      alert(res.error || "Room join nahi hua");
+      return;
+    }
+
+    roomCode = res.code;
+    myColor = res.color;
+
+    showRoom(res.players);
+  });
+}
+
+function showRoom(players){
+  document.getElementById("login").style.display = "none";
+  document.getElementById("game").style.display = "block";
+
+  if(typeof build === "function"){
+    build();
+  }
+
+  const msg = document.getElementById("msg");
+
+  if(msg){
+    msg.innerHTML =
+      "🌐 Room: <b>" + roomCode + "</b><br>" +
+      "👥 Players: " + players.length + "/4<br>" +
+      players.map(p => p.name + " — " + p.color.toUpperCase()).join("<br>");
+  }
+}
+
+onlineSocket.on("roomUpdate", function(room){
+  if(!room || !room.players) return;
+
+  const msg = document.getElementById("msg");
+
+  if(msg && roomCode){
+    msg.innerHTML =
+      "🌐 Room: <b>" + roomCode + "</b><br>" +
+      "👥 Players: " + room.players.length + "/4<br>" +
+      room.players.map(p => p.name + " — " + p.color.toUpperCase()).join("<br>");
+  }
+});
+
+function addOnlineButtons(){
+  const login = document.getElementById("login");
+
+  if(!login || document.getElementById("onlinePanel")) return;
+
+  const panel = document.createElement("div");
+  panel.id = "onlinePanel";
+
+  panel.style.marginTop = "15px";
+  panel.style.padding = "15px";
+  panel.style.background = "#f1f5f9";
+  panel.style.color = "#111";
+  panel.style.borderRadius = "15px";
+
+  panel.innerHTML = `
+    <hr>
+    <h3>🌐 ONLINE LUDO</h3>
+
+    <button
+      onclick="createOnlineRoom()"
+      style="width:100%;padding:13px;margin:5px 0;border:0;border-radius:10px;background:#16a34a;color:white;font-weight:bold">
+      🏠 CREATE ROOM
+    </button>
+
+    <input
+      id="roomCodeInput"
+      placeholder="Room Code"
+      style="width:100%;box-sizing:border-box;padding:12px;margin:5px 0;border-radius:10px;border:1px solid #ccc;text-transform:uppercase">
+
+    <button
+      onclick="joinOnlineRoom()"
+      style="width:100%;padding:13px;margin:5px 0;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:bold">
+      👥 JOIN ROOM
+    </button>
+  `;
+
+  login.appendChild(panel);
+}
+
+setTimeout(addOnlineButtons, 300);
+</script>
+
+
+<script>
+/* BHATTI_REAL_ONLINE_START */
+
+(function(){
+
+  if(typeof onlineSocket === "undefined"){
+    window.onlineSocket = io();
+  }
+
+  const oldRollDice = window.rollDice;
+  const oldMoveToken = window.moveToken;
+
+  window.rollDice = function(){
+
+    if(!window.roomCode || !window.myColor){
+      return oldRollDice();
+    }
+
+    onlineSocket.emit("onlineRoll");
+  };
+
+  onlineSocket.on("onlineDice",function(data){
+
+    if(!data) return;
+
+    dice=data.dice;
+    canRoll=false;
+
+    const dEl=document.getElementById("dice");
+    if(dEl) dEl.innerText=dice;
+
+    const msg=document.getElementById("msg");
+    if(msg) msg.innerText=dice+" aya!";
+
+    check();
+  });
+
+  window.moveToken = function(p,i){
+
+    if(window.roomCode && window.myColor){
+
+      if(p!==window.myColor) return;
+
+      const el=document.getElementById("t-"+p+i);
+      if(!el || !el.classList.contains("active")) return;
+
+      onlineSocket.emit("onlineMove",{
+        player:p,
+        index:i
+      });
+
+      return;
+    }
+
+    return oldMoveToken(p,i);
+  };
+
+  onlineSocket.on("onlineMove",function(data){
+
+    if(!data) return;
+
+    dice=data.dice;
+
+    const p=data.player;
+    const i=data.index;
+
+    const el=document.getElementById("t-"+p+i);
+    if(!el) return;
+
+    if(pos[p][i]===-1){
+
+      pos[p][i]=0;
+
+      const idx=startIdx[p];
+      const rc=track[idx];
+
+      el.style.top=(rc[0]*100/15)+"%";
+      el.style.left=(rc[1]*100/15)+"%";
+
+    }else{
+
+      pos[p][i]+=dice;
+
+      if(pos[p][i]>=57){
+
+        el.innerHTML="👑";
+        el.style.background="gold";
+
+      }else{
+
+        const boardIdx=(startIdx[p]+pos[p][i])%52;
+
+        if(pos[p][i]>=51){
+
+          const homeStep=pos[p][i]-51;
+          let rr,cc;
+
+          if(p=="r"){rr=7;cc=1+homeStep}
+          if(p=="g"){rr=1+homeStep;cc=7}
+          if(p=="y"){rr=13-homeStep;cc=7}
+          if(p=="b"){rr=7;cc=13-homeStep}
+
+          el.style.top=(rr*100/15)+"%";
+          el.style.left=(cc*100/15)+"%";
+
+        }else{
+
+          const rc=track[boardIdx];
+
+          el.style.top=(rc[0]*100/15)+"%";
+          el.style.left=(rc[1]*100/15)+"%";
+        }
+      }
+
+      checkKill(p,i);
+    }
+
+    document.querySelectorAll(".token")
+      .forEach(e=>e.classList.remove("active"));
+
+    canRoll=true;
+    updateTurn();
+  });
+
+  onlineSocket.on("onlineTurn",function(data){
+
+    if(!data) return;
+
+    const colors=["r","g","b","y"];
+    const n=colors.indexOf(data.color);
+
+    if(n>=0){
+      current=n;
+      canRoll=true;
+      updateTurn();
+    }
+  });
+
+  onlineSocket.on("onlineError",function(msg){
+    alert(msg);
+  });
+
+})();
+
+/* BHATTI_REAL_ONLINE_END */
+</script>
+
 </html>
 
 <script>
