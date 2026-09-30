@@ -1,78 +1,433 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bhatti Ludo - Final Order</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bhatti Ludo</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0f172a;color:white;font-family:Arial;display:flex;justify-content:center;padding:10px}
-.container{width:100%;max-width:430px}
-.login{background:white;color:#111;padding:25px;border-radius:20px;text-align:center;margin-top:30px}
-.login h1{color:#e63946}
-input{width:100%;padding:14px;margin:10px 0;border:1px solid #ddd;border-radius:10px}
-.login button{width:100%;background:#e63946;color:white;padding:14px;border:0;border-radius:12px;font-weight:bold;font-size:18px}
+*{box-sizing:border-box}
+body{margin:0;background:#0f172a;color:#fff;font-family:Arial;text-align:center}
+.wrap{max-width:440px;margin:auto;padding:12px}
+.login{background:#fff;color:#111;padding:25px;border-radius:20px;margin-top:40px}
+input{width:100%;padding:14px;margin:10px 0;border-radius:10px;border:1px solid #ccc;font-size:16px}
+button{padding:13px 20px;border:0;border-radius:12px;font-weight:bold;font-size:16px}
+.login button{width:100%;background:#e63946;color:#fff}
 .game{display:none}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.coins{background:#fbbf24;color:#111;padding:8px 14px;border-radius:20px;font-weight:bold}
-.board{width:100%;aspect-ratio:1;background:#fff7ed;border:5px solid #111;border-radius:14px;position:relative;overflow:hidden;display:block}
-.grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr)}
-.cell{border:0.5px solid #ddd}
-.hr{background:#fecaca}.hg{background:#bbf7d0}.hy{background:#fef08a}.hb{background:#bfdbfe}
-.path{background:#ffffff}
-.token{position:absolute;width:6.2%;height:6.2%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;z-index:10;transition:all 0.5s ease;border:2px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.6)}
-.token.r{background:radial-gradient(#ff6b6b,#dc2626)}
-.token.g{background:radial-gradient(#4ade80,#16a34a)}
-.token.y{background:radial-gradient(#fde047,#eab308)}
-.token.b{background:radial-gradient(#60a5fa,#2563eb)}
-.token.active{box-shadow:0 0 0 3px gold,0 0 20px gold;transform:scale(1.25)}
-.dice{width:76px;height:76px;background:white;color:#111;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.5);transition:all 0.6s ease;z-index:20;border:3px solid gold;position:absolute}
-.dice.pos-r{top:20%;left:20%}
-.dice.pos-g{top:20%;right:20%;left:auto}
-.dice.pos-y{bottom:20%;left:20%;top:auto}
-.dice.pos-b{bottom:20%;right:20%;top:auto;left:auto}
-.dice.rolling{animation:roll 0.3s infinite}
-@keyframes roll{0%{transform:rotate(0deg) scale(1.1)}100%{transform:rotate(360deg) scale(1.1)}}
-.controls{margin-top:12px;background:rgba(255,255,255,0.08);padding:14px;border-radius:16px;text-align:center}
-.turn{font-size:17px;font-weight:bold;margin-bottom:6px}
-.turn.r{color:#ff6b6b}.turn.g{color:#4ade80}.turn.y{color:#fde047}.turn.b{color:#60a5fa}
-.btn-roll{background:#fbbf24;color:#111;width:160px;padding:12px;border-radius:12px;border:0;font-weight:bold;font-size:17px;cursor:pointer}
+.head{display:flex;justify-content:space-between;align-items:center}
+.coins{background:#fbbf24;color:#111;padding:8px 12px;border-radius:20px}
+.board{position:relative;width:100%;aspect-ratio:1;background:#fff;border:5px solid #111;border-radius:12px;overflow:hidden;margin-top:12px}
+.grid{display:grid;width:100%;height:100%;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr)}
+.cell{border:1px solid #ddd}
+.redhome{background:#fecaca}.greenhome{background:#bbf7d0}
+.yellowhome{background:#fef08a}.bluehome{background:#bfdbfe}
+.path{background:#fff}
+.token{position:absolute;width:7%;height:7%;border-radius:50%;border:2px solid #fff;z-index:5;display:flex;align-items:center;justify-content:center;font-size:16px;transition:.4s;box-shadow:0 2px 5px #0008}
+.r{background:#dc2626}.g{background:#16a34a}.y{background:#eab308}.b{background:#2563eb}
+.active{box-shadow:0 0 0 3px gold,0 0 15px gold}
+.dice{position:absolute;width:70px;height:70px;background:#fff;color:#111;border:3px solid gold;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:bold;z-index:10}
+.dr{top:19%;left:19%}.dg{top:19%;right:19%}
+.dy{bottom:19%;left:19%}.db{bottom:19%;right:19%}
+.controls{margin-top:12px;background:#ffffff12;padding:15px;border-radius:15px}
+.roll{background:#fbbf24;color:#111;width:170px}
+.msg{min-height:24px;margin-top:10px;font-weight:bold}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
+
 <div class="login" id="login">
 <h1>🦁 Bhatti Ludo</h1>
-<p style="color:#666;margin:8px 0 15px">Red → Green → Blue → Yellow</p>
-<input id="name" placeholder="Naam likho">
-<button onclick="startGame()">PLAY 🦁</button>
+<p>Online-style Ludo</p>
+<input id="name" placeholder="Apna naam likho">
+<button onclick="start()">PLAY 🎲</button>
 </div>
+
 <div class="game" id="game">
-<div class="header"><h2>🦁 Bhatti Ludo</h2><div class="coins">🪙 <span id="coins">500</span></div></div>
-<div class="board" id="board"><div class="grid" id="grid"></div><div class="dice pos-r" id="dice" onclick="rollDice()">🎲</div></div>
+<div class="head">
+<h2>🦁 Bhatti Ludo</h2>
+<div class="coins">🪙 <span id="coins">500</span></div>
+</div>
+
+<div class="board" id="board">
+<div class="grid" id="grid"></div>
+<div id="dice" class="dice dr" onclick="roll()">🎲</div>
+</div>
+
 <div class="controls">
-<div id="turn" class="turn r">🔴 Red ki bari</div>
-<button class="btn-roll" onclick="rollDice()">ROLL DICE 🎲</button>
-<div id="msg" style="margin-top:8px;font-weight:bold;min-height:20px">Dice ghar se ayega - Bari bari!</div>
+<div id="turn">🔴 Red ki bari</div>
+<button class="roll" onclick="roll()">ROLL DICE 🎲</button>
+<div class="msg" id="msg">Dice roll karein</div>
 </div>
 </div>
 </div>
+
 <script>
-let coins=500,current=0,players=['r','g','b','y'],names={r:'Red 🔴🦁',g:'Green 🟢🦁',b:'Blue 🔵🦁',y:'Yellow 🟡🦁'};
-let dice=0,canRoll=true;
-let pos={r:[-1,-1,-1,-1],g:[-1,-1,-1,-1],y:[-1,-1,-1,-1],b:[-1,-1,-1,-1]};
-const track=[[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]];
-const homeCells={r:[[1,1],[1,4],[4,1],[4,4]],g:[[1,10],[1,13],[4,10],[4,13]],y:[[10,1],[10,4],[13,1],[13,4]],b:[[10,10],[10,13],[13,10],[13,13]]};
-const startIdx={r:0,g:13,b:39,y:26};
-const safeIdx=[0,8,13,21,26,34,39,47];
-function startGame(){let n=document.getElementById('name').value.trim();if(!n){alert('Naam likho');return}document.getElementById('login').style.display='none';document.getElementById('game').style.display='block';build();}
-function build(){let g=document.getElementById('grid');g.innerHTML='';for(let r=0;r<15;r++){for(let c=0;c<15;c++){let cell=document.createElement('div');cell.className='cell';if(r<6&&c<6)cell.classList.add('hr');else if(r<6&&c>8)cell.classList.add('hg');else if(r>8&&c<6)cell.classList.add('hy');else if(r>8&&c>8)cell.classList.add('hb');else cell.classList.add('path');g.appendChild(cell);}}let board=document.getElementById('board');board.querySelectorAll('.token').forEach(e=>e.remove());for(let p of ['r','g','b','y']){for(let i=0;i<4;i++){let t=document.createElement('div');t.className='token '+p;t.id='t-'+p+i;t.innerHTML='🦁';let rc=homeCells[p][i];t.style.top=(rc[0]*100/15)+'%';t.style.left=(rc[1]*100/15)+'%';t.onclick=()=>moveToken(p,i);board.appendChild(t);}}updateTurn();}
-function rollDice(){if(!canRoll)return;let dEl=document.getElementById('dice');dEl.classList.add('rolling');setTimeout(()=>{dEl.classList.remove('rolling');dice=Math.floor(Math.random()*6)+1;dEl.innerText=dice;document.getElementById('msg').innerText=dice+' aya!';canRoll=false;check();},400);}
-function check(){let p=players[current];let has=false;for(let i=0;i<4;i++){if(pos[p][i]==-1&&dice==6)has=true;if(pos[p][i]>=0&&pos[p][i]<57)has=true}if(!has){document.getElementById('msg').innerText='Koi chaal nahi - agla player';setTimeout(nextTurn,1000);return}for(let i=0;i<4;i++){let el=document.getElementById('t-'+p+i);if((pos[p][i]==-1&&dice==6)||(pos[p][i]>=0&&pos[p][i]<57)){el.classList.add('active');}}document.getElementById('msg').innerText=names[p]+' - Sher chuno 🦁';}
-function moveToken(p,i){if(players[current]!=p)return;let el=document.getElementById('t-'+p+i);if(!el.classList.contains('active'))return;if(pos[p][i]==-1){pos[p][i]=0;let idx=startIdx[p];let rc=track[idx];el.style.top=(rc[0]*100/15)+'%';el.style.left=(rc[1]*100/15)+'%';coins+=10;document.getElementById('coins').innerText=coins;}else{pos[p][i]+=dice;if(pos[p][i]>=57){el.innerHTML='👑';el.style.background='gold';}else{let boardIdx=(startIdx[p]+pos[p][i])%52;if(pos[p][i]>=51){let homeStep=pos[p][i]-51;let rr,cc;if(p=='r'){rr=7;cc=1+homeStep}if(p=='g'){rr=1+homeStep;cc=7}if(p=='y'){rr=13-homeStep;cc=7}if(p=='b'){rr=7;cc=13-homeStep}el.style.top=(rr*100/15)+'%';el.style.left=(cc*100/15)+'%';}else{let rc=track[boardIdx];el.style.top=(rc[0]*100/15)+'%';el.style.left=(rc[1]*100/15)+'%';}}checkKill(p,i);}document.querySelectorAll('.token').forEach(e=>e.classList.remove('active'));nextTurn();}
-function checkKill(p,i){if(pos[p][i]>=51)return;let myIdx=(startIdx[p]+pos[p][i])%52;if(safeIdx.includes(myIdx))return;for(let op of players){if(op==p)continue;for(let j=0;j<4;j++){if(pos[op][j]>=0&&pos[op][j]<51){let opIdx=(startIdx[op]+pos[op][j])%52;if(opIdx==myIdx){pos[op][j]=-1;let el=document.getElementById('t-'+op+j);let rc=homeCells[op][j];el.style.top=(rc[0]*100/15)+'%';el.style.left=(rc[1]*100/15)+'%';el.innerHTML='🦁';document.getElementById('msg').innerText='🦁 '+names[p]+' ne '+names[op]+' ko kha liya!';coins+=20;document.getElementById('coins').innerText=coins;}}}}}
-function nextTurn(){canRoll=true;current=(current+1)%4;document.getElementById('dice').innerText='🎲';updateTurn();}
-function updateTurn(){let p=players[current];let el=document.getElementById('turn');el.className='turn '+p;el.innerText=names[p]+' ki bari';let d=document.getElementById('dice');d.className='dice pos-'+p;d.innerText='🎲';document.getElementById('msg').innerText='Dice '+names[p]+' ke ghar me hai!';}
+const players=['r','g','b','y'];
+
+const names={
+r:'Red 🔴',
+g:'Green 🟢',
+y:'Yellow 🟡',
+b:'Blue 🔵'
+};
+
+let current=0;
+let dice=0;
+let canRoll=true;
+let coins=500;
+
+const pos={
+r:[-1,-1,-1,-1],
+g:[-1,-1,-1,-1],
+y:[-1,-1,-1,-1],
+b:[-1,-1,-1,-1]
+};
+
+/*
+  Board ka main 52-step track
+*/
+const track=[
+[6,1],[6,2],[6,3],[6,4],[6,5],
+[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],
+[0,7],[0,8],
+[1,8],[2,8],[3,8],[4,8],[5,8],
+[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
+[7,14],[8,14],
+[8,13],[8,12],[8,11],[8,10],[8,9],
+[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],
+[14,7],[14,6],
+[13,6],[12,6],[11,6],[10,6],[9,6],
+[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],
+[7,0]
+];
+
+/*
+  ہر رنگ کا اپنا گھر
+*/
+const homes={
+r:[[1,1],[1,4],[4,1],[4,4]],
+g:[[1,10],[1,13],[4,10],[4,13]],
+y:[[10,1],[10,4],[13,1],[13,4]],
+b:[[10,10],[10,13],[13,10],[13,13]]
+};
+
+/*
+  صحیح starting positions
+*/
+const start={
+r:0,
+g:13,
+y:26,
+b:39
+};
+
+/*
+  ہر رنگ کی اپنی home lane
+*/
+const lane={
+r:[[7,1],[7,2],[7,3],[7,4],[7,5]],
+g:[[1,7],[2,7],[3,7],[4,7],[5,7]],
+y:[[13,7],[12,7],[11,7],[10,7],[9,7]],
+b:[[7,13],[7,12],[7,11],[7,10],[7,9]]
+};
+
+function start(){
+let n=document.getElementById('name').value.trim();
+
+if(!n){
+alert('Apna naam likho');
+return;
+}
+
+document.getElementById('login').style.display='none';
+document.getElementById('game').style.display='block';
+
+build();
+}
+
+function build(){
+
+let grid=document.getElementById('grid');
+grid.innerHTML='';
+
+for(let r=0;r<15;r++){
+
+for(let c=0;c<15;c++){
+
+let x=document.createElement('div');
+x.className='cell';
+
+if(r<6 && c<6)x.classList.add('redhome');
+else if(r<6 && c>8)x.classList.add('greenhome');
+else if(r>8 && c<6)x.classList.add('yellowhome');
+else if(r>8 && c>8)x.classList.add('bluehome');
+else x.classList.add('path');
+
+grid.appendChild(x);
+}
+}
+
+let board=document.getElementById('board');
+
+for(let p of players){
+
+for(let i=0;i<4;i++){
+
+let t=document.createElement('div');
+
+t.id='t'+p+i;
+t.className='token '+p;
+t.innerHTML='🦁';
+
+let h=homes[p][i];
+
+t.style.left=(h[1]*100/15)+'%';
+t.style.top=(h[0]*100/15)+'%';
+
+t.onclick=()=>move(p,i);
+
+board.appendChild(t);
+}
+}
+
+update();
+}
+
+function roll(){
+
+if(!canRoll)return;
+
+dice=Math.floor(Math.random()*6)+1;
+
+document.getElementById('dice').innerText=dice;
+
+canRoll=false;
+
+document.getElementById('msg').innerText=
+names[players[current]]+' ne '+dice+' nikala!';
+
+highlight();
+}
+
+function highlight(){
+
+let p=players[current];
+
+let possible=false;
+
+for(let i=0;i<4;i++){
+
+let can=false;
+
+if(pos[p][i]===-1 && dice===6)
+can=true;
+
+if(pos[p][i]>=0 && pos[p][i]<57)
+can=true;
+
+if(can){
+
+possible=true;
+
+document.getElementById('t'+p+i)
+.classList.add('active');
+}
+}
+
+if(!possible){
+
+document.getElementById('msg').innerText=
+'Koi valid move nahi.';
+
+setTimeout(next,800);
+}
+}
+
+function move(p,i){
+
+if(players[current]!==p)return;
+
+let t=document.getElementById('t'+p+i);
+
+if(!t.classList.contains('active'))return;
+
+t.classList.remove('active');
+
+if(pos[p][i]===-1){
+
+pos[p][i]=0;
+
+coins+=10;
+
+document.getElementById('coins').innerText=coins;
+
+place(p,i);
+
+}else{
+
+pos[p][i]+=dice;
+
+if(pos[p][i]>=57){
+
+pos[p][i]=57;
+
+t.innerHTML='👑';
+
+t.style.background='gold';
+
+coins+=50;
+
+document.getElementById('coins').innerText=coins;
+
+}else{
+
+place(p,i);
+
+}
+}
+
+clearActive();
+
+if(dice===6){
+
+canRoll=true;
+
+document.getElementById('msg').innerText=
+names[p]+' ko 6 mila! Dobara roll karein 🎲';
+
+}else{
+
+next();
+}
+}
+
+function place(p,i){
+
+let t=document.getElementById('t'+p+i);
+
+let step=pos[p][i];
+
+/*
+  Home lane
+*/
+if(step>=51){
+
+let laneStep=step-51;
+
+if(laneStep>4)laneStep=4;
+
+let rc=lane[p][laneStep];
+
+t.style.left=(rc[1]*100/15)+'%';
+t.style.top=(rc[0]*100/15)+'%';
+
+return;
+}
+
+/*
+  Main track
+*/
+let index=(start[p]+step)%52;
+
+let rc=track[index];
+
+t.style.left=(rc[1]*100/15)+'%';
+t.style.top=(rc[0]*100/15)+'%';
+
+kill(p,i);
+}
+
+function kill(p,i){
+
+let step=pos[p][i];
+
+if(step<0 || step>=51)return;
+
+let index=(start[p]+step)%52;
+
+/*
+  safe positions
+*/
+const safe=[0,8,13,21,26,34,39,47];
+
+if(safe.includes(index))return;
+
+for(let op of players){
+
+if(op===p)continue;
+
+for(let j=0;j<4;j++){
+
+if(pos[op][j]>=0 && pos[op][j]<51){
+
+let other=
+(start[op]+pos[op][j])%52;
+
+if(other===index){
+
+pos[op][j]=-1;
+
+let t=document.getElementById('t'+op+j);
+
+let h=homes[op][j];
+
+t.style.left=(h[1]*100/15)+'%';
+t.style.top=(h[0]*100/15)+'%';
+
+t.innerHTML='🦁';
+
+coins+=20;
+
+document.getElementById('coins').innerText=coins;
+
+document.getElementById('msg').innerText=
+names[p]+' ne '+names[op]+' ko kha liya! 🦁';
+}
+}
+}
+}
+}
+
+function clearActive(){
+
+document
+.querySelectorAll('.token')
+.forEach(x=>x.classList.remove('active'));
+}
+
+function next(){
+
+canRoll=true;
+
+current=(current+1)%4;
+
+document.getElementById('dice').innerText='🎲';
+
+update();
+}
+
+function update(){
+
+let p=players[current];
+
+let d=document.getElementById('dice');
+
+d.className='dice '+({
+r:'dr',
+g:'dg',
+y:'dy',
+b:'db'
+}[p]);
+
+d.innerText='🎲';
+
+document.getElementById('turn').innerText=
+names[p]+' ki bari';
+
+document.getElementById('msg').innerText=
+'Dice '+names[p]+' ke ghar mein hai!';
+}
+
 </script>
 </body>
 </html>
